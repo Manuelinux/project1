@@ -1,0 +1,12 @@
+node ('dev'){
+    stage("Dev prerrequisites"){
+        sh "python -V"
+    }
+        stage("Check out development repository"){
+        git url: 'https://github.com/Manuelinux/project1.git'
+    }
+    stage ("Run code on dev environment"){
+        sh "  PYTHONPATH='' nosetests"
+    }
+}
+
