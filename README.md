@@ -8,3 +8,4 @@ pylint -f parseable -d I0011,R0801 project1 | tee pylint.out
 cleaning comments
 Testing!
 ya me canse!!
+mas cansado
