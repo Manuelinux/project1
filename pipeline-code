@@ -1,0 +1,29 @@
+node ('master'){
+    stage("Dev prerrequisites"){
+        sh "python -V"
+    }
+        stage("Check out development repository"){
+        git url: 'https://github.com/Manuelinux/project1.git', branch: 'dev'
+    }
+    stage ("Run code on dev environment"){
+        sh "  PYTHONPATH='' nosetests --with-xunit --all-modules --traverse-namespace --with-coverage --cover-package=project1 --cover-inclusive"
+        sh "python -m coverage xml --include=project1*"
+        sh "pylint -f parseable -d I0011,R0801 project1 | tee pylint.out"
+    }
+    stage ("Publish results"){
+        step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
+        input 'Is everything ok?'
+    }
+    
+    stage ("Git commit"){
+        git url: 'https://github.com/Manuelinux/project1.git', 
+        credentialsId: '85dd58ea-c58d-4c53-8537-e8c97f97139b',
+        branch: 'master'
+        withCredentials([usernamePassword(credentialsId: '85dd58ea-c58d-4c53-8537-e8c97f97139b', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USER')]){
+         sh 'git merge dev'
+         sh 'git add .'
+         sh 'git commit -m "Merged develop branch to master"'
+         sh "git push origin master"   
+        }
+    }
+}
