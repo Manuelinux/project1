@@ -1,4 +1,4 @@
-node ('master'){
+node ('testing'){
     stage("Dev prerrequisites"){
         sh "python -V"
     }
@@ -17,13 +17,19 @@ node ('master'){
     
     stage ("Git commit"){
         git url: 'https://github.com/Manuelinux/project1.git', 
-        credentialsId: '85dd58ea-c58d-4c53-8537-e8c97f97139b',
+        credentialsId: 'credentials_id',
         branch: 'master'
-        withCredentials([usernamePassword(credentialsId: '85dd58ea-c58d-4c53-8537-e8c97f97139b', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USER')]){
+        withCredentials([[
+           $class: 'UsernamePasswordMultiBinding',
+           credentialsId: 'credentials_id',
+           usernameVariable: 'GIT_USERNAME',
+           passwordVariable: 'GIT_PASSWORD'
+       ]]){
+         sh 'git config --global user.email "your_email"'
+         sh 'git config --global user.name "your_username"'
          sh 'git merge dev'
-         sh 'git add .'
-         sh 'git commit -m "Merged develop branch to master"'
-         sh "git push origin master"   
+         sh 'git config credential.helper "/bin/bash ' + env.WORKSPACE + '/credential-helper.sh"'
+         sh'git push origin master'
         }
     }
 }
